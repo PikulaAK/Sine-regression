@@ -1,12 +1,12 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import math
 from scipy.optimize import leastsq
 import tkinter as tk
 from tkinter import messagebox
 
-def sinusoidal_model(x, a, b, c, d):
-    return a * np.sin(b * x + c) + d
+round_to = 0
 
 def read_excel_data(filepath):
     data = pd.read_excel(filepath)
@@ -25,22 +25,28 @@ def perform_regression(x, y):
     return est_amp, est_freq, est_phase, est_mean
 
 def plot_results(x, y, params):
+    global round_to
     est_amp, est_freq, est_phase, est_mean = params
     fine_x = np.linspace(min(x), max(x), 1000)
     data_fit = est_amp * np.sin(est_freq * fine_x + est_phase) + est_mean
+    graph_equation = f"{est_amp:.{round_to}f}sin({est_freq:.{round_to}f}x + {est_phase:.{round_to}f}) + {est_mean:.{round_to}f}"
 
     plt.figure(figsize=(10, 5))
     plt.scatter(x, y, label='Data Points', color='red')
     plt.plot(fine_x, data_fit, label='Fitted Curve', color='blue')
     plt.title('Sinusoidal Regression')
-    plt.xlabel('Independent Variable')
-    plt.ylabel('Dependent Variable')
+    plt.xlabel(graph_equation)
+    print(graph_equation)
+    plt.ylabel('')
     plt.legend()
     plt.grid()
+
     plt.show()
 
 def main():
+    global round_to
     file_path = input("Enter Excel file path: ")
+    round_to = input("What decimal place would you like to round to? ")
     x, y = read_excel_data(filepath=file_path)
     params = perform_regression(x, y)
     plot_results(x, y, params)
