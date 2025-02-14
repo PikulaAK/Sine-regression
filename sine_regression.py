@@ -1,8 +1,7 @@
-# filepath: /C:/Data/Projects/Avash/Python/_git/Sine-regression/sine_regression.py
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
+from scipy.optimize import leastsq
 import tkinter as tk
 from tkinter import messagebox
 
@@ -14,14 +13,25 @@ def read_excel_data(filepath):
     return data.iloc[:, 0], data.iloc[:, 1]  # Assuming first column is x and second is y
 
 def perform_regression(x, y):
-    initial_guess = [1, 1, 1, 1]  # Initial guess for parameters a, b, c, d
-    params, _ = curve_fit(sinusoidal_model, x, y, p0=initial_guess)
-    return params
+    guess_mean = np.mean(y)
+    guess_std = 3 * np.std(y) / (2**0.5)
+    guess_phase = 0
+    guess_freq = 1
+    guess_amp = 1
+
+    optimize_func = lambda params: params[0] * np.sin(params[1] * x + params[2]) + params[3] - y
+    est_amp, est_freq, est_phase, est_mean = leastsq(optimize_func, [guess_amp, guess_freq, guess_phase, guess_mean])[0]
+    
+    return est_amp, est_freq, est_phase, est_mean
 
 def plot_results(x, y, params):
+    est_amp, est_freq, est_phase, est_mean = params
+    fine_x = np.linspace(min(x), max(x), 1000)
+    data_fit = est_amp * np.sin(est_freq * fine_x + est_phase) + est_mean
+
     plt.figure(figsize=(10, 5))
     plt.scatter(x, y, label='Data Points', color='red')
-    plt.plot(x, sinusoidal_model(x, *params), label='Fitted Curve', color='blue')
+    plt.plot(fine_x, data_fit, label='Fitted Curve', color='blue')
     plt.title('Sinusoidal Regression')
     plt.xlabel('Independent Variable')
     plt.ylabel('Dependent Variable')
@@ -42,4 +52,3 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         messagebox.showerror("Error", str(e))
-
