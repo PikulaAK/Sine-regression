@@ -31,9 +31,17 @@ def plot_results(x, y, params):
     data_fit = est_amp * np.sin(est_freq * fine_x + est_phase) + est_mean
     graph_equation = f"{est_amp:.{round_to}f}sin({est_freq:.{round_to}f}x + {est_phase:.{round_to}f}) + {est_mean:.{round_to}f}"
 
+    # For loop to iterate over x and y
+    residuals = []
+    for xi, yi in zip(x, y):
+        print(f"x: {xi}, y: {yi}")
+        residual = yi - (est_amp * math.sin(est_freq* xi + est_phase) + est_mean)
+        residuals.append(residual)
+
     plt.figure(figsize=(10, 5))
     plt.scatter(x, y, label='Data Points', color='red')
     plt.plot(fine_x, data_fit, label='Fitted Curve', color='blue')
+    plt.scatter(x, residuals, label='Residuals', color='green')
     plt.title('Sinusoidal Regression')
     plt.xlabel(graph_equation)
     print(graph_equation)
